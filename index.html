@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c1a16">
+<title>إدارة محل الذهب</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- الشريط العلوي: الكاش الحالي + سعر النقابة (ظاهر دائماً) -->
+<header class="topbar">
+  <div class="stat cash-stat">
+    <div class="stat-label">رصيد الكاش الحالي الآن</div>
+    <div class="stat-value" id="cashNow">0</div>
+    <div class="stat-sub" id="cashSub">لم يُدخل رصيد الافتتاح بعد</div>
+  </div>
+  <button class="stat price-stat" id="priceBtn" type="button">
+    <div class="stat-label">تسعيرة النقابة — اضغط للتعديل ✎</div>
+    <div id="priceNow" class="price-mini"></div>
+  </button>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="trade" class="active">بيع / شراء</button>
+  <button data-tab="cash">الكاش اليومي</button>
+  <button data-tab="past">الأيام الماضية</button>
+  <button data-tab="agents">المندوبين</button>
+  <button data-tab="history">السجل</button>
+  <button data-tab="settings">الإعدادات</button>
+</nav>
+
+<main>
+  <!-- ============ بيع / شراء ============ -->
+  <section id="tab-trade" class="tab active">
+    <div id="exchBanner" class="exch-banner" hidden></div>
+    <div class="mode-switch">
+      <button class="mode sale active" data-mode="sale" type="button">🟢 بيع لزبون</button>
+      <button class="mode purchase" data-mode="purchase" type="button">🔵 شراء من زبون</button>
+    </div>
+
+    <div class="card">
+      <label class="field-label">العيار</label>
+      <div class="seg" id="tradeKarat"></div>
+      <div class="seg minor" id="tradeKaratMinor"></div>
+
+      <div class="grid2">
+        <div>
+          <label class="field-label" for="tWeight">الوزن (غرام)</label>
+          <input id="tWeight" class="big-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label" for="tGram">سعر الغرام لهذا العيار</label>
+          <input id="tGram" class="big-input" inputmode="decimal" autocomplete="off">
+          <button type="button" class="link" id="tGramReset">↺ الرجوع لسعر التسعيرة</button>
+        </div>
+      </div>
+
+      <div id="purchExtraWrap" hidden>
+        <label class="field-label" for="tPaid">المبلغ المدفوع للزبون (اتركه فارغاً = حسب التسعيرة)</label>
+        <input id="tPaid" class="big-input final-input" inputmode="decimal" placeholder="حسب التسعيرة" autocomplete="off">
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label class="field-label" for="tItem">اسم القطعة (خاتم، سلسال، إسوارة...)</label>
+          <input id="tItem" class="big-input small" autocomplete="off" list="itemSuggestions">
+          <datalist id="itemSuggestions">
+            <option value="خاتم"><option value="محبس"><option value="سلسال"><option value="إسوارة"><option value="حلق"><option value="تعليقة"><option value="طقم"><option value="ليرة"><option value="أونصة"><option value="كسر">
+          </datalist>
+        </div>
+        <div>
+          <label class="field-label" for="tCustomer">اسم الزبون (اختياري)</label>
+          <input id="tCustomer" class="big-input small" autocomplete="off">
+        </div>
+      </div>
+
+      <div id="cartWrap">
+        <button class="btn-primary outline" id="tAddItem" type="button">＋ إضافة القطعة للفاتورة وإدخال قطعة أخرى</button>
+        <div id="cartList" class="cart"></div>
+      </div>
+
+      <div id="saleFinalWrap">
+        <label class="field-label" for="tFinal" id="tFinalLabel">السعر النهائي (المبلغ المتفق عليه مع الزبون)</label>
+        <input id="tFinal" class="big-input final-input" inputmode="decimal" placeholder="0" autocomplete="off">
+      </div>
+
+      <div class="total-box" id="tTotalBox">
+        <div class="total-label" id="tTotalLabel">المبلغ المطلوب من الزبون</div>
+        <div class="total-value" id="tTotal">0</div>
+        <div class="total-calc" id="tCalc"></div>
+        <div class="breakdown" id="tBreak"></div>
+      </div>
+
+      <div data-df="trade"></div>
+      <button class="btn-primary sale" id="tSubmit" type="button">✔ تأكيد عملية البيع</button>
+    </div>
+
+    <div id="lastSaved"></div>
+    <h3 class="section-title">آخر عمليات اليوم</h3>
+    <div id="todayList" class="list"></div>
+  </section>
+
+  <!-- ============ الكاش اليومي ============ -->
+  <section id="tab-cash" class="tab">
+    <div class="card day-card">
+      <h3 id="dayTitle"></h3>
+      <div class="hint" id="dayHint"></div>
+      <button class="btn-primary red" id="closeDayBtn" type="button">🔒 إغلاق اليوم</button>
+      <button class="btn-primary green" id="openDayBtn" type="button">🔓 فتح يوم جديد</button>
+    </div>
+
+    <div class="card" id="openingCard">
+      <h3>رصيد افتتاح الصباح</h3>
+      <div class="grid2">
+        <input id="openingInput" class="big-input" inputmode="decimal" placeholder="رصيد الافتتاح">
+        <button class="btn-primary" id="openingSave" type="button">تعديل رصيد الافتتاح</button>
+      </div>
+      <div class="hint" id="openingHint"></div>
+    </div>
+
+    <div class="card">
+      <h3>حركة كاش يدوية (مصروف / إيداع / سحب)</h3>
+      <div class="grid2">
+        <input id="cmAmount" class="big-input" inputmode="decimal" placeholder="المبلغ">
+        <input id="cmNote" class="big-input small" placeholder="البيان (مثلاً: أجار، سحب صاحب المحل...)">
+      </div>
+      <div data-df="cash"></div>
+      <div class="grid2">
+        <button class="btn-primary green" id="cmIn" type="button">＋ إدخال كاش للصندوق</button>
+        <button class="btn-primary red" id="cmOut" type="button">－ إخراج كاش من الصندوق</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>ملخص اليوم</h3>
+      <div class="summary" id="daySummary"></div>
+    </div>
+  </section>
+
+  <!-- ============ الأيام الماضية ============ -->
+  <section id="tab-past" class="tab">
+    <button type="button" class="btn-primary outline" id="archBtn2" style="margin:0 0 12px">📦 بدء فترة جديدة (أرشفة الأيام القديمة على Drive)</button>
+    <div class="hint" style="margin:0 4px 10px">اختر يوماً لمراجعة عملياته واحدة واحدة، وتعديل أي عملية أو تسجيل إرجاع/تبديل. كل تعديل يُحفظ في سجل العملية ويُعاد حساب اليوم تلقائياً.</div>
+    <div id="pastList" class="list"></div>
+    <div id="pastDetail" hidden></div>
+  </section>
+
+  <!-- ============ المندوبين ============ -->
+  <section id="tab-agents" class="tab">
+    <div id="agentsListView">
+      <div class="card">
+        <div class="grid2">
+          <input id="agName" class="big-input small" placeholder="اسم المندوب الجديد">
+          <input id="agPhone" class="big-input small" placeholder="الهاتف (اختياري)" inputmode="tel">
+        </div>
+        <button class="btn-primary" id="agAdd" type="button">＋ إضافة مندوب</button>
+      </div>
+      <div id="agentsList" class="agents-grid"></div>
+    </div>
+
+    <div id="agentDetailView" hidden>
+      <button class="btn-back" id="agBack" type="button">→ رجوع لقائمة المندوبين</button>
+      <div class="agent-head card">
+        <div>
+          <div class="agent-name" id="adName"></div>
+          <div class="hint" id="adPhone"></div>
+        </div>
+        <div class="agent-balance" id="adBalance"></div>
+      </div>
+
+      <div class="card">
+        <div class="mode-switch">
+          <button class="mode purchase active" data-amode="buy" type="button">شراء من المندوب</button>
+          <button class="mode sale" data-amode="sell" type="button">بيع للمندوب</button>
+        </div>
+        <label class="field-label">العيار</label>
+        <div class="seg" id="agKarat">
+          <button type="button" data-k="21" class="active">العيار الأساسي (21)</button>
+          <button type="button" data-k="18">عيار 18</button>
+        </div>
+        <div class="grid2">
+          <div>
+            <label class="field-label" for="amWeight">الوزن (غرام)</label>
+            <input id="amWeight" class="big-input" inputmode="decimal" placeholder="0.00">
+          </div>
+          <div>
+            <label class="field-label" for="amRate">العيار المعتمد للحساب</label>
+            <input id="amRate" class="big-input" inputmode="decimal">
+            <button type="button" class="link" id="amRateReset">↺ القيمة الافتراضية</button>
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label class="field-label" for="amFee" id="amFeeLabel">أجور ندفعها للمندوب (تخرج من الكاش)</label>
+            <input id="amFee" class="big-input" inputmode="decimal" placeholder="0">
+          </div>
+          <div>
+            <label class="field-label" for="amNote">ملاحظة (اختياري)</label>
+            <input id="amNote" class="big-input small">
+          </div>
+        </div>
+        <div class="total-box" id="amBox">
+          <div class="total-label">الوزن المحسوب في الحساب</div>
+          <div class="total-value" id="amEquiv">0</div>
+          <div class="total-calc" id="amCalc"></div>
+        </div>
+        <div data-df="agent"></div>
+        <button class="btn-primary" id="amSubmit" type="button">✔ تسجيل الحركة</button>
+      </div>
+
+      <h3 class="section-title">حركات المندوب</h3>
+      <div id="agentMoves" class="list"></div>
+    </div>
+  </section>
+
+  <!-- ============ السجل ============ -->
+  <section id="tab-history" class="tab">
+    <div class="card filters">
+      <select id="hDay" class="big-input small"></select>
+      <select id="hType" class="big-input small">
+        <option value="">كل العمليات</option>
+        <option value="sale">بيع</option>
+        <option value="purchase">شراء</option>
+        <option value="cash_in">إدخال كاش</option>
+        <option value="cash_out">إخراج كاش</option>
+        <option value="agent_fee">أجور مندوبين</option>
+        <option value="opening">رصيد افتتاح</option>
+        <option value="price">تعديل التسعيرة</option>
+        <option value="close">إغلاق اليوم</option>
+        <option value="return">إرجاع / تبديل</option>
+      </select>
+      <button class="btn-primary" id="hAll" type="button">كل الأيام</button>
+    </div>
+    <div id="hDayReport"></div>
+    <div class="summary" id="hSummary"></div>
+    <div id="historyList" class="list"></div>
+  </section>
+
+  <!-- ============ الإعدادات ============ -->
+  <section id="tab-settings" class="tab">
+    <div class="card">
+      <h3>القيم الافتراضية للمندوبين</h3>
+      <table class="rates">
+        <tr><th></th><th>العيار الأساسي (21)</th><th>عيار 18</th></tr>
+        <tr><td>شراء من المندوب</td>
+          <td><input id="sBuy21" class="big-input small" inputmode="decimal"></td>
+          <td><input id="sBuy18" class="big-input small" inputmode="decimal"></td></tr>
+        <tr><td>بيع للمندوب</td>
+          <td><input id="sSell21" class="big-input small" inputmode="decimal"></td>
+          <td><input id="sSell18" class="big-input small" inputmode="decimal"></td></tr>
+      </table>
+      <label class="field-label" for="sRef">رصيد المندوب يُحسب بوزن ذهب عيار (المرجع):</label>
+      <select id="sRef" class="big-input small">
+        <option value="875">عيار 21 (875)</option>
+        <option value="1000">ذهب صافي (1000)</option>
+      </select>
+      <div class="hint">الوزن المحسوب = الوزن × العيار المعتمد ÷ عيار المرجع. مثال: 10 غ عيار 21 بسعر 885 = 10 × 885 ÷ 875 = 10.114 غ.</div>
+      <button class="btn-primary" id="sSave" type="button">حفظ الإعدادات</button>
+    </div>
+
+    <div class="card">
+      <h3>📦 بدء فترة جديدة (أرشفة)</h3>
+      <div class="hint">احفظ الأيام القديمة (شهر أو أكثر أو أقل) في ملف على Drive، ثم احذفها من الجهاز لتبدأ بسجل نظيف. أرصدة المندوبين والتسعيرة والإعدادات واليوم المفتوح تبقى كما هي.</div>
+      <button class="btn-primary" id="archBtn" type="button">📦 أرشفة الأيام القديمة وبدء فترة جديدة</button>
+    </div>
+
+    <div class="card">
+      <h3>النسخ الاحتياطي (مهم جداً)</h3>
+      <div class="hint">البيانات محفوظة داخل الجهاز. احفظ نسخة احتياطية بشكل دوري (يومياً مثلاً) وأرسلها لنفسك على واتساب أو احفظها في Google Drive، حتى لا تضيع إذا تعطّل الجهاز.</div>
+      <div class="grid2">
+        <button class="btn-primary" id="bExport" type="button">⬇ تصدير نسخة احتياطية</button>
+        <label class="btn-primary outline">⬆ استرجاع من نسخة احتياطية
+          <input type="file" id="bImport" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="hint" id="storageInfo"></div>
+    </div>
+  </section>
+</main>
+
+<!-- نافذة تعديل تسعيرة النقابة -->
+<dialog id="priceDlg">
+  <form method="dialog">
+    <h3>تسعيرة النقابة (سعر الغرام)</h3>
+    <table class="price-table">
+      <tr><th></th><th>بيع للزبون</th><th>شراء من الزبون</th></tr>
+      <tr class=""><td>عيار 21</td><td><input id="p21s" class="big-input" inputmode="decimal"></td><td><input id="p21b" class="big-input" inputmode="decimal"></td></tr><tr class=""><td>عيار 18</td><td><input id="p18s" class="big-input" inputmode="decimal"></td><td><input id="p18b" class="big-input" inputmode="decimal"></td></tr><tr class=""><td>عيار 24</td><td><input id="p24s" class="big-input" inputmode="decimal"></td><td><input id="p24b" class="big-input" inputmode="decimal"></td></tr>
+      <tr class="minor-head"><td colspan="3">عيارات أقل استخداماً</td></tr>
+      <tr class="minor"><td>عيار 14</td><td><input id="p14s" class="big-input" inputmode="decimal"></td><td><input id="p14b" class="big-input" inputmode="decimal"></td></tr><tr class="minor"><td>عيار 9</td><td><input id="p9s" class="big-input" inputmode="decimal"></td><td><input id="p9b" class="big-input" inputmode="decimal"></td></tr>
+    </table>
+    <div class="grid2">
+      <button class="btn-primary" value="ok" id="priceOk">حفظ التسعيرة</button>
+      <button class="btn-primary outline" value="cancel" formnovalidate>إلغاء</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- نافذة إغلاق اليوم -->
+<dialog id="closeDayDlg">
+  <form method="dialog">
+    <h3>إغلاق اليوم — <span id="cdTitle"></span></h3>
+    <div class="summary" id="cdSummary"></div>
+    <label class="field-label" for="cdActual">الكاش الفعلي الموجود في الدرج (اختياري — لمعرفة الفرق)</label>
+    <input id="cdActual" class="big-input" inputmode="decimal" placeholder="اتركه فارغاً إذا لم تعدّ الكاش">
+    <div class="diff-box" id="cdDiff"></div>
+    <input id="cdNote" class="big-input small" placeholder="ملاحظة على الإغلاق (اختياري)">
+    <div class="grid2">
+      <button class="btn-primary red" value="ok">🔒 تأكيد إغلاق اليوم</button>
+      <button class="btn-primary outline" value="cancel" formnovalidate>إلغاء</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- نافذة فتح يوم جديد -->
+<dialog id="openDayDlg">
+  <form method="dialog">
+    <h3>فتح يوم جديد — <span id="odDate"></span></h3>
+    <label class="field-label" for="odOpening">رصيد افتتاح الصباح (الكاش الموجود في الدرج)</label>
+    <input id="odOpening" class="big-input" inputmode="decimal">
+    <div class="hint" id="odHint"></div>
+    <div class="grid2">
+      <button class="btn-primary green" value="ok">🔓 بدء اليوم</button>
+      <button class="btn-primary outline" value="cancel" formnovalidate>لاحقاً</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- نافذة تعديل عملية -->
+<dialog id="editDlg">
+  <h3 id="eTitle">تعديل عملية</h3>
+  <div id="eBody"></div>
+  <div class="grid2">
+    <div>
+      <label class="field-label" for="eDate">تاريخ ووقت العملية</label>
+      <input type="datetime-local" id="eDate" class="big-input small">
+    </div>
+    <div>
+      <label class="field-label" for="eReason">سبب التعديل (يُحفظ في سجل العملية)</label>
+      <input id="eReason" class="big-input small" placeholder="مثلاً: خطأ في الوزن">
+    </div>
+  </div>
+  <div class="total-box" id="eCalc"></div>
+  <div class="grid2">
+    <button type="button" class="btn-primary" id="eSave">💾 حفظ التعديل</button>
+    <button type="button" class="btn-primary outline" id="eCancel">إلغاء</button>
+  </div>
+</dialog>
+
+<!-- نافذة الإرجاع / التبديل -->
+<dialog id="retDlg">
+  <h3 id="rTitle">إرجاع</h3>
+  <div class="hint" id="rInfo"></div>
+  <label class="field-label" for="rAmount" id="rAmountLabel">المبلغ</label>
+  <input id="rAmount" class="big-input" inputmode="decimal">
+  <label class="field-label" for="rReason">السبب / ملاحظة (اختياري)</label>
+  <input id="rReason" class="big-input small" placeholder="مثلاً: المقاس غير مناسب">
+  <div data-df="ret"></div>
+  <div class="grid2">
+    <button type="button" class="btn-primary red" id="rOk">↩ تسجيل الإرجاع</button>
+    <button type="button" class="btn-primary outline" id="rCancel">إلغاء</button>
+  </div>
+</dialog>
+
+<!-- نافذة الأرشفة -->
+<dialog id="archDlg">
+  <h3>📦 بدء فترة جديدة — أرشفة الأيام القديمة</h3>
+  <div class="hint">الأيام المختارة تُحفظ في ملفات (ملف للاحتفاظ + ملفين Excel للقراءة) ثم تُحذف من الجهاز. <b>أرصدة المندوبين تبقى</b> (تُرحّل كرصيد افتتاحي)، والتسعيرة والإعدادات واليوم المفتوح لا تتأثر.</div>
+  <label class="field-label" for="arTo">أرشفة كل الأيام المغلقة حتى تاريخ (ويشمله):</label>
+  <input type="date" id="arTo" class="big-input small">
+  <div class="summary" id="arInfo" style="margin-top:10px"></div>
+  <button type="button" class="btn-primary" id="arExport">1️⃣ حفظ ملفات الأرشيف (اختر Drive)</button>
+  <div class="hint" id="arExportHint"></div>
+  <button type="button" class="btn-primary red" id="arPurge" disabled>2️⃣ حذف هذه الأيام من الجهاز وبدء فترة جديدة</button>
+  <button type="button" class="btn-primary outline" id="arCancel">إغلاق</button>
+</dialog>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
