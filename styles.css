@@ -1,0 +1,279 @@
+:root {
+  --bg: #1c1a16;
+  --card: #2a2721;
+  --card2: #34302a;
+  --line: #4a443a;
+  --text: #f4efe4;
+  --muted: #b7ad9a;
+  --gold: #e2bd5a;
+  --gold-dark: #b8922f;
+  --green: #3fb27f;
+  --red: #e0645c;
+  --blue: #4b9be0;
+  --radius: 16px;
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  font-size: 20px; line-height: 1.5;
+  padding: env(safe-area-inset-top) 0 40px;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.num, .stat-value, .total-value, .agent-balance, .row-amount { font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+
+/* الشريط العلوي */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;
+  padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 18px; text-align: right; }
+.stat-label { color: var(--muted); font-size: 17px; }
+.stat-value { font-size: 44px; font-weight: 800; line-height: 1.15; text-align: right; }
+.stat-sub { color: var(--muted); font-size: 15px; }
+.cash-stat .stat-value { color: var(--green); }
+.cash-stat .stat-value.neg { color: var(--red); }
+.gold { color: var(--gold); }
+.price-stat { border-color: var(--gold-dark); }
+.price-stat:active { background: var(--card2); }
+
+.price-mini { display: grid; grid-template-columns: auto 1fr 1fr; gap: 0 14px; align-items: baseline; margin-top: 2px; }
+.price-mini .k { color: var(--muted); font-size: 16px; }
+.price-mini .v { font-size: 20px; font-weight: 800; color: var(--gold); direction: ltr; text-align: right; }
+.price-mini .v small { color: var(--muted); font-weight: 500; font-size: 13px; }
+.price-mini .main.v { font-size: 27px; }
+.price-mini .empty-p { grid-column: 1 / -1; color: var(--gold); font-size: 24px; font-weight: 800; }
+.price-table { width: 100%; border-collapse: separate; border-spacing: 8px; }
+.price-table th { color: var(--muted); font-weight: 500; font-size: 17px; }
+.price-table td:first-child { font-weight: 800; font-size: 22px; white-space: nowrap; color: var(--gold); }
+.price-table .big-input { font-size: 26px; min-height: 60px; }
+.price-table tr.minor td:first-child { font-size: 17px; color: var(--muted); }
+.price-table tr.minor .big-input { font-size: 19px; min-height: 48px; }
+.price-table .minor-head td { color: var(--muted); font-size: 15px; font-weight: 500; padding-top: 10px; border-top: 1px solid var(--line); }
+.seg.minor { margin-top: 10px; }
+.seg.minor::before { content: 'عيارات أخرى:'; color: var(--muted); font-size: 16px; align-self: center; }
+.seg.minor button { flex: 0 0 120px; min-height: 50px; font-size: 18px; min-width: 0; }
+.b-agent_fee { background: rgba(224,100,92,.15); color: #e89a6a; }
+
+/* التبويبات */
+.tabs { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; }
+.tabs button {
+  flex: 1; min-width: 118px; min-height: 64px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--line); font-size: 21px; font-weight: 700;
+}
+.tabs button.active { background: var(--gold); color: #1c1a16; border-color: var(--gold); }
+
+main { padding: 0 16px; max-width: 1200px; margin: 0 auto; }
+.tab { display: none; }
+.tab.active { display: block; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+.card h3 { margin: 0 0 12px; color: var(--gold); }
+.section-title { color: var(--muted); margin: 18px 4px 8px; font-size: 19px; }
+.field-label { display: block; color: var(--muted); font-size: 17px; margin: 10px 0 6px; }
+.hint { color: var(--muted); font-size: 16px; margin-top: 8px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-bottom: 8px; }
+
+.big-input {
+  width: 100%; min-height: 68px; padding: 8px 16px; border-radius: 14px;
+  background: #15130f; border: 2px solid var(--line); font-size: 30px; font-weight: 700;
+}
+.big-input.small { font-size: 21px; font-weight: 500; min-height: 60px; }
+.big-input:focus { outline: none; border-color: var(--gold); }
+input[inputmode="decimal"] { direction: ltr; text-align: right; }
+
+.link { background: none; border: none; color: var(--gold); font-size: 16px; padding: 6px 0; }
+
+/* أزرار */
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; width: 100%;
+  min-height: 72px; border-radius: 14px; border: none; margin-top: 10px;
+  background: var(--gold); color: #1c1a16; font-size: 24px; font-weight: 800;
+}
+.btn-primary:active { transform: scale(.98); }
+.btn-primary.sale, .btn-primary.green { background: var(--green); color: #fff; }
+.btn-primary.purchase { background: var(--blue); color: #fff; }
+.btn-primary.red { background: var(--red); color: #fff; }
+.btn-primary.outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); cursor: pointer; }
+.btn-back { background: none; border: none; color: var(--gold); font-size: 21px; padding: 10px 0; }
+
+.mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.mode {
+  min-height: 84px; border-radius: 16px; font-size: 27px; font-weight: 800;
+  background: var(--card); border: 3px solid var(--line); color: var(--muted);
+}
+.mode.sale.active { background: var(--green); border-color: var(--green); color: #fff; }
+.mode.purchase.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 10px; }
+.seg button {
+  flex: 1; min-width: 110px; min-height: 66px; border-radius: 14px;
+  background: var(--card2); border: 2px solid var(--line); font-size: 24px; font-weight: 700;
+}
+.seg button.active { border-color: var(--gold); background: #3d3424; color: var(--gold); }
+
+.total-box { margin-top: 14px; padding: 14px 18px; border-radius: 14px; background: #15130f; border: 2px dashed var(--gold-dark); }
+.total-label { color: var(--muted); font-size: 18px; }
+.total-value { font-size: 52px; font-weight: 800; color: var(--gold); text-align: right; }
+.total-calc { color: var(--muted); font-size: 16px; direction: rtl; }
+
+/* القوائم */
+.list { display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px;
+}
+.row.void { opacity: .45; text-decoration: line-through; }
+.badge { padding: 6px 12px; border-radius: 10px; font-size: 17px; font-weight: 700; white-space: nowrap; }
+.b-sale { background: rgba(63,178,127,.18); color: var(--green); }
+.b-purchase { background: rgba(75,155,224,.18); color: var(--blue); }
+.b-cash_in { background: rgba(63,178,127,.18); color: var(--green); }
+.b-cash_out { background: rgba(224,100,92,.18); color: var(--red); }
+.b-opening, .b-price { background: rgba(226,189,90,.15); color: var(--gold); }
+.row-main { font-size: 18px; }
+.row-sub { color: var(--muted); font-size: 15px; }
+.row-amount { font-size: 24px; font-weight: 800; text-align: left; }
+.row-amount.pos { color: var(--green); }
+.row-amount.neg { color: var(--red); }
+.row-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+.row-actions button { background: none; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: 15px; padding: 6px 12px; }
+.empty { color: var(--muted); text-align: center; padding: 24px; }
+
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.sum-item { background: var(--card2); border-radius: 12px; padding: 10px 14px; }
+.sum-item .k { color: var(--muted); font-size: 16px; }
+.sum-item .v { font-size: 26px; font-weight: 800; direction: ltr; text-align: right; }
+
+/* المندوبين */
+.agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.agent-card {
+  text-align: right; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 18px; min-height: 120px;
+}
+.agent-card:active { background: var(--card2); }
+.agent-card .name { font-size: 24px; font-weight: 800; }
+.agent-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.agent-name { font-size: 30px; font-weight: 800; }
+.agent-balance { font-size: 40px; font-weight: 800; text-align: left; }
+.bal { font-weight: 800; }
+.bal-label { font-size: 16px; color: var(--muted); display: block; direction: rtl; text-align: inherit; }
+.bal.pos { color: var(--blue); }
+.bal.neg { color: var(--green); }
+
+.rates { width: 100%; border-collapse: separate; border-spacing: 8px; }
+.rates th { color: var(--muted); font-size: 16px; font-weight: 500; }
+.rates td:first-child { font-weight: 700; white-space: nowrap; }
+
+.filters { display: grid; grid-template-columns: 1.4fr 1fr 180px; gap: 10px; align-items: center; }
+.filters .btn-primary { margin-top: 0; min-height: 60px; font-size: 20px; }
+
+dialog { background: var(--card); color: var(--text); border: 2px solid var(--gold); border-radius: 20px; width: min(640px, 94vw); padding: 22px; }
+dialog::backdrop { background: rgba(0,0,0,.65); }
+dialog h3 { color: var(--gold); margin-top: 0; }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(150%);
+  background: var(--gold); color: #1c1a16; font-weight: 800; padding: 14px 26px; border-radius: 14px;
+  transition: transform .25s; z-index: 50; font-size: 20px; max-width: 90vw; text-align: center;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.err { background: var(--red); color: #fff; }
+
+@media (max-width: 720px) {
+  body { font-size: 18px; }
+  .topbar { grid-template-columns: 1fr; }
+  .stat-value { font-size: 34px; }
+  .grid2, .filters { grid-template-columns: 1fr; }
+  .mode { font-size: 21px; }
+  .total-value { font-size: 40px; }
+}
+
+/* المصنعية والإغلاق */
+.final-input { font-size: 40px; min-height: 80px; border-color: var(--gold-dark); }
+.breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-top: 10px; }
+.breakdown:empty { display: none; }
+.breakdown .sum-item .v { font-size: 24px; }
+.breakdown .neg, .diff-box .neg { color: var(--red); }
+.breakdown .pos, .diff-box .pos { color: var(--green); }
+.warn { color: var(--red); font-weight: 700; margin-top: 8px; }
+.saved-card { border-color: var(--green); }
+.saved-card h3 { color: var(--green) !important; }
+.day-card h3 { font-size: 24px; }
+.day-card.closed { border-color: var(--red); }
+.diff-box { font-size: 24px; font-weight: 800; margin: 8px 0 4px; min-height: 10px; }
+.day-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; text-align: right; width: 100%;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.day-row:active { background: var(--card2); }
+.day-row .d { font-weight: 800; font-size: 20px; }
+.day-row .st { font-size: 16px; }
+.day-row .st.open { color: var(--green); } .day-row .st.closed { color: var(--muted); }
+.day-row .nums { grid-column: 1 / -1; color: var(--muted); font-size: 16px; }
+.b-close { background: rgba(224,100,92,.15); color: var(--red); }
+dialog .summary { margin-bottom: 4px; }
+dialog { max-height: 92vh; overflow-y: auto; }
+
+/* فاتورة بيع متعددة القطع */
+.cart { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.cart:empty { display: none; }
+.cart-head { color: var(--gold); font-weight: 800; font-size: 18px; }
+.cart-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; align-items: center;
+  background: #15130f; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.cart-row .n { color: var(--muted); font-weight: 800; }
+.cart-row .t { font-size: 19px; font-weight: 700; }
+.cart-row .s { color: var(--muted); font-size: 15px; }
+.cart-row .g { font-weight: 800; direction: ltr; }
+.cart-row button { background: none; border: 1px solid var(--red); color: var(--red); border-radius: 10px; font-size: 18px; min-width: 48px; min-height: 44px; }
+.cart-total { text-align: left; color: var(--muted); font-size: 16px; }
+
+/* التاريخ اليدوي */
+.date-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 12px; padding: 10px 14px;
+  border-radius: 12px; background: #15130f; border: 1px dashed var(--line); color: var(--muted); font-size: 17px; }
+.date-field .df-input { flex: 1 1 260px; min-height: 52px; direction: ltr; }
+.date-field.manual { border: 2px solid #e8963a; color: #f0b26a; background: rgba(232,150,58,.08); }
+.date-field.manual .df-text { font-weight: 800; flex-basis: 100%; }
+
+/* حالات العملية */
+.flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.flag { font-size: 14px; padding: 3px 10px; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-block; }
+.f-edit { background: rgba(232,150,58,.18); color: #f0b26a; }
+.f-ret { background: rgba(75,155,224,.18); color: var(--blue); }
+.f-void { background: rgba(224,100,92,.18); color: var(--red); }
+.row.void .flags, .row.void .flag { text-decoration: none; }
+details.edits { margin-top: 6px; font-size: 15px; color: var(--muted); }
+details.edits summary { cursor: pointer; color: #f0b26a; }
+details.edits div { margin-top: 6px; }
+.row-actions { gap: 8px; flex-wrap: wrap; }
+.row-actions button { font-size: 16px; padding: 8px 14px; min-height: 44px; }
+.row-actions button[data-edit] { border-color: #e8963a; color: #f0b26a; }
+.row-actions button[data-ret], .row-actions button[data-exch] { border-color: var(--blue); color: var(--blue); }
+.row-actions button[data-void] { border-color: var(--red); color: var(--red); }
+.b-return { background: rgba(75,155,224,.18); color: var(--blue); }
+
+/* الأيام الماضية */
+.past-row { grid-template-columns: 1fr auto; }
+.past-nums { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.pn small { display: block; color: var(--muted); font-size: 14px; }
+.pn b { font-size: 21px; direction: ltr; unicode-bidi: isolate; }
+.pn .neg, .breakdown .neg { color: var(--red); } .pn .pos { color: var(--green); }
+.sum-item .v.neg { color: var(--red); } .sum-item .v.pos { color: var(--green); }
+.pd-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.pd-actions .btn-primary { font-size: 19px; min-height: 60px; }
+
+/* نافذة التعديل */
+#editDlg { width: min(860px, 96vw); }
+.edit-item { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr auto; gap: 8px; margin-bottom: 8px; }
+.edit-item .big-input { min-height: 52px; font-size: 19px; padding: 6px 10px; }
+.edit-item-head { display: none; }
+.edit-item .del { background: none; border: 1px solid var(--red); color: var(--red); border-radius: 10px; min-width: 48px; font-size: 18px; }
+#eCalc .total-value { font-size: 36px; }
+
+/* التبديل */
+.exch-banner { background: rgba(75,155,224,.14); border: 2px solid var(--blue); color: var(--text); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; font-size: 18px; }
+.exch-net { margin-top: 8px; font-size: 20px; color: var(--blue); }
+@media (max-width: 720px) { .edit-item { grid-template-columns: 1fr 1fr; } }
+
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+#archDlg { width: min(720px, 96vw); }
